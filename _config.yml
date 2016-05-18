@@ -19,6 +19,5 @@ github_username:  JamesB192
 
 # Build settings
 markdown: kramdown
-
-timezone:America/Los_Angeles
-safe:true
+timezone: America/Los_Angeles
+safe: true
