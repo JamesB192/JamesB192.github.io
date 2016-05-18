@@ -4,7 +4,7 @@ This article mostly obselete.
 
 2016 May 18 -- Updated to mend some broken links.
 
-If you ran [http://www.polypux.org/projects/read-edid/](get-edid) and pipe the output through parse-edid ala
+If you ran [get-edid](http://www.polypux.org/projects/read-edid/) and pipe the output through parse-edid ala
 
  <kbd>./get-edid |./parse-edid</kbd>
 
@@ -79,5 +79,5 @@ EndSection</samp>
 ```
 
 You could then insert the approprite data into your configuration files. This was done on a modified
-  [http://store.disklessworkstations.com/info/ltsp_t150.html](LTSP Term 150) running
-  [http://www.gentoo.org/](Gentoo Linux) and [http://xorg.freedesktop.org/](Xorg) 6.8.2-r6.
+  [LTSP Term 150](http://store.disklessworkstations.com/info/ltsp_t150.html) running
+  [Xorg](http://www.gentoo.org/](Gentoo Linux) and [http://xorg.freedesktop.org/) 6.8.2-r6.
