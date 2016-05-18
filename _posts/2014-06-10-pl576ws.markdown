@@ -1,0 +1,77 @@
+# James Brownings PL576ws page
+
+If you run <a href="http://john.fremlin.de/programs/linux/read-edid/index.html">get-edid</a> and pipe the output through parse-edid ala
+
+ <kbd>./get-edid |./parse-edid</kbd>
+
+and you get.
+
+ <samp>./get-edid: get-edid version 1.4.1
+
+        Performing real mode VBE call
+        Interrupt 0x10 ax=0x4f00 bx=0x0 cx=0x0
+        Function supported
+        Call successful
+
+        VBE version 200
+        VBE string at 0xc0056 "Copyright 1998 TRIDENT MICROSYSTEMS INC."
+
+VBE/DDC service about to be called
+        Report DDC capabilities
+
+        Performing real mode VBE call
+        Interrupt 0x10 ax=0x4f15 bx=0x0 cx=0x0
+        Function supported
+        Call successful
+
+        Monitor and video card combination does not support DDC1 transfers
+        Monitor and video card combination supports DDC2 transfers
+        0 seconds per 128 byte EDID block transfer
+        Screen is not blanked during DDC transfer
+
+Reading next EDID block
+
+VBE/DDC service about to be called
+        Read EDID
+
+        Performing real mode VBE call
+        Interrupt 0x10 ax=0x4f15 bx=0x1 cx=0x0
+./parse-edid: parse-edid version 1.4.1
+        Function supported
+        Call successful
+
+./parse-edid: EDID checksum passed.
+
+        # EDID version 1 revision 3
+Section "Monitor"
+        # Block type: 2:0 3:fd
+        # Block type: 2:0 3:ff
+        Identifier "PTS:df05"
+        VendorName "PTS"
+        ModelName "PTS:df05"
+        # Block type: 2:0 3:fd
+        HorizSync 31-50
+        VertRefresh 60-70
+        # Max dot clock (video bandwidth) 70 MHz
+        # Block type: 2:0 3:ff
+        # DPMS capabilities: Active off:yes  Suspend:no  Standby:no
+
+        Mode    "1280x800"      # vfreq 60.024Hz, hfreq 50.000kHz
+                DotClock        70.000000
+                HTimings        1280 1290 1300 1400
+                VTimings        800 802 812 833
+                Flags   "+HSync" "+VSync"
+        EndMode
+        Mode    "1280x768"      # vfreq 60.022Hz, hfreq 48.377kHz
+                DotClock        80.500000
+                HTimings        1280 1344 1472 1664
+                VTimings        768 779 786 806
+                Flags   "+HSync" "-VSync"
+        EndMode
+        # Block type: 2:0 3:fd
+        # Block type: 2:0 3:ff
+EndSection</samp>
+
+You can then insert the approprite data into your configuration files. This was done on a modified
+  [http://store.disklessworkstations.com/info/ltsp_t150.html](LTSP Term 150) running
+  [http://www.gentoo.org/](Gentoo Linux) and [http://xorg.freedesktop.org/](Xorg) 6.8.2-r6.
