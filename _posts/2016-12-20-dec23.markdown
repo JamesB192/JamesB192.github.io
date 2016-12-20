@@ -1,4 +1,4 @@
-# Meal proscpectus DEC 23
+# Meal prospectus DEC 23
 
 ## Lunch Sausage Dinner
 * Bratwurst
@@ -17,9 +17,9 @@
 * Sliced Potatoes
 * Mozzarella
 
-### Homamade Bavarian
+### Homemade Bavarian
 * Crust
 * Red Sauce
-* Mozarella
+* Mozzarella
 * Sliced leftover Sausage
 * Sauerkraut
