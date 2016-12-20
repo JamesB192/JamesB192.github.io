@@ -2,6 +2,7 @@
 
 ## Lunch Sausage Dinner
 * Bratwurst
+* Sauerkraut
 * Potato Pearls
 * Creamed Corn
 * Green Beans

@@ -1,0 +1,33 @@
+# Grandmas Raisin cookies
+
+## Ingerediants
+* 2 Cups Raisins
+* 1-1/2 Cups Water
+* 1 tsp Baking Soda
+
+* 1 Cup Shortening
+* 1 tsp Cinnamon
+* 1/2 tsp Nutmeg
+* 1/4 tsp Alspice
+* 2 Cups Sugar
+* 1 tsp Kirkland Vanilla
+* 3 eggs
+
+* 4 cups flouur
+* 1 tsp Baking Powder
+* 1/2 tsp Salt
+
+* 1-1/2 Cups Chopped Walnuts
+
+## Process
+1. simmer raisins in water for five minutes
+1. drain raisins retaining 1/2 cup of liquid
+1. mix shortening, spices an vanilla
+1. introdude sugar via creaming method
+1. beat in eggs one at a time
+1. sift together flour, baking powder and salt
+1. add baking soda to retained raisin liquid
+1. add retained liquid alternately with dry team to the shortening
+1. add raisins and nuts
+1. drop by teaspoons on parchechment paper
+1. bake at 350F 12-15 to prefference
