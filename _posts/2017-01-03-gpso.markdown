@@ -1,0 +1,359 @@
+# html5/php gpsd client
+
+
+
+```php
+<?php
+header('Content-Type: text/event-stream');
+header('Cache-Control: no-cache');
+
+function SSEsend($in){
+        printf("data: %s\n\n", json_encode($in));
+        ob_flush();
+        flush();
+}
+
+$digitclip=pow(10,1);
+$toclip=['track','lat','lon','alt','epx','epy','epv','eps','speed','climb'];
+//error_reporting(E_ALL);
+$tpvs=['time'];
+
+
+if (($socket=socket_create(AF_INET, SOCK_STREAM, SOL_TCP)) and (socket_connect($socket, "127.0.0.1", 2947))) {
+      $fluff=socket_read($socket,2048,PHP_NORMAL_READ);
+      socket_write($socket,"?WATCH={\"enable\":true,\"json\":true,\"scaled\":true}\n");
+    while(1) {
+        $escape=3;
+        while ($escape>0) {
+            $fluff=socket_read($socket,2048,PHP_NORMAL_READ);
+            $bleh=json_decode($fluff,true);
+            switch($bleh{'class'}) {
+                case "SKY":
+                    SSEsend(['class' => 'sky','satellites' => $bleh['satellites']]);
+                    break;
+                case "TPV":
+                    $outy=['class' => 'tpv'];
+                    foreach($tpvs as $fog){
+                        if(isset($bleh[$fog])) {
+                            $outy[$fog]=$bleh[$fog];
+                          }
+                      }
+                    foreach($toclip as $fog){
+                        if(isset($bleh[$fog])) {
+                            $outy[$fog]=round($bleh[$fog]*$digitclip)/$digitclip;
+                          }
+                      }
+                    SSEsend($outy);
+                    break;
+              }
+          }
+      }
+    socket_close($socket);
+  }
+
+?>
+```
+
+```html
+<!DOCTYPE html>                                                                                                                                                                                                                    
+[239/1909]
+<html><head xmlns="http://www.w3.org/1999/xhtml">
+        <meta name="viewport" content="width=device-width, initial-scale=1"/>
+        <meta charset="utf-8" />
+        <title>Not working GPS Thing</title>
+        <script src="//code.jquery.com/jquery-2.2.4.js"></script>
+        <script type="text/javascript" src="/js/jqmlns.js"></script>
+        <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA7A3au4CGXS55oFYDnu9r3wmYNkDmeVbA&sensor=false"></script>
+        <style type="text/css">
+#map-canvas {float:right;height:500px;width:500px;}
+#prn td {text-align:right;}
+#prn td:nth-child(3) {text-align:center}
+#tabtpv td:nth-child(1){font-weight:bold;}
+#tabtpv td:nth-child(3){text-align:left;}
+#tabtpv td:nth-child(5){text-align:left;}
+#tabtpv td{text-align:right;}
+#tabtpv tbody tr:nth-child(2){visibility:none;}
+  form{float:left}
+  svg{float:left;}
+  path{stroke:rgba(255,255,255,0.5);fill:none;}
+  table { clear:right;}
+  #arrow{stroke:none;fill:pink;}
+table { background-image: url('/foods/oldimg2/texture_orange_3556.gif');
+padding:5px; margin:15px; clear:right;}
+body {background-image: url('/foods/oldimg2/wood-tiled.jpg');}
+
+path#scope {fill:#003000}
+circle,rect {stroke-width:1}
+g.e {fill:grey;stroke:grey}
+g.r {fill:red;stroke:red}
+g.y {fill:yellow;stroke:yellow}
+g.g {fill:green;stroke:green}
+g.b {fill:cyan;stroke:cyan}
+
+g.f circle,g.f rect,g.t text {fill:#003000}
+g.t text {stroke:#003000;}
+
+g.q circle,g rect  {visibility:hidden}
+g.q rect {visibility:visible}
+
+#ring{fill-rule:evenodd;fill:url(#Fr);}
+stop{stop-opacity:1;stop-color:black;}
+        </style>
+        <script type="text/javascript">
+ var gap=20, scalar=300, from, spots, jsob, back, bod, prn, arrow, map;
+ var scopetrig=true, scopebands=2, dx=0, dy=0, testmode=-1, testdata=[
+{"class":"tpv","time":"2013-09-16T13:55:35.000Z","lat":46.367355979,"lon":-116.963821707,"alt":461.905,"epx":10.911,"epy":34.942,"epv":41.909,"track":332.4648,"speed":0.495,"climb":-0.591,"eps":69.88}
+,{"class":"sky","satellites":[
+ {"PRN":0,"el":18,"az":0,"ss":45,"used":true}           ,{"PRN":1,"el":18,"az":72,"ss":37,"used":true}
+,{"PRN":2,"el":18,"az":144,"ss":32,"used":true}         ,{"PRN":3,"el":18,"az":216,"ss":20,"used":true}
+,{"PRN":4,"el":18,"az":288,"ss":5,"used":true}          ,{"PRN":5,"el":36,"az":180,"ss":45,"used":false}
+,{"PRN":6,"el":36,"az":252,"ss":37,"used":false}        ,{"PRN":7,"el":36,"az":324,"ss":32,"used":false}
+,{"PRN":8,"el":36,"az":36,"ss":20,"used":false}         ,{"PRN":9,"el":36,"az":108,"ss":5,"used":false}
+,{"PRN":50,"el":54,"az":0,"ss":45,"used":true}          ,{"PRN":51,"el":54,"az":72,"ss":37,"used":true}
+,{"PRN":52,"el":54,"az":144,"ss":32,"used":true}        ,{"PRN":53,"el":54,"az":216,"ss":20,"used":true}
+,{"PRN":54,"el":54,"az":288,"ss":5,"used":true}         ,{"PRN":55,"el":72,"az":180,"ss":45,"used":false}
+,{"PRN":56,"el":72,"az":252,"ss":37,"used":false}       ,{"PRN":57,"el":72,"az":324,"ss":32,"used":false}
+,{"PRN":58,"el":72,"az":36,"ss":20,"used":false}        ,{"PRN":59,"el":72,"az":108,"ss":5,"used":false}
+]}
+,{"class":"tpv","time":"1993-06-24T13:55:35.472Z"}
+];
+
+// 45 37 32 20 5
+
+function init() {
+  var d, e, i, j, k;
+  bod=document.getElementsByTagName('body')[0];
+  switch(scopebands){
+      case 2:
+        if(scopetrig)
+            {i=scalar*Math.cos((45/180)*Math.PI).toFixed(2);}
+          else {i=scalar/2;}
+        k="A"+i+" "+i+" 0 0 0 0,";
+        d="M0,"+i+k+(-i)+k+i+"Z";
+        break;
+      case 3:
+        if(scopetrig)
+            {i=scalar*Math.cos((60/180)*Math.PI).toFixed(2);}
+          else {i=scalar/3;}
+        k="A"+i+" "+i+" 0 0 0 0,";
+        d="M0,"+i+k+(-i)+k+i+"Z";
+        if(scopetrig)
+            {i=scalar*Math.cos((30/180)*Math.PI).toFixed(2);}
+          else {i*=2;}
+        k="A"+i+" "+i+" 0 0 0 0,";
+        d+="M0,"+i+k+(-i)+k+i+"Z";
+        break;
+      default:
+        d="";
+    }
+  i=gap+scalar;
+  j={"transform":"translate("+i+","+i+")"};
+  k="A"+scalar+" "+scalar+" 0 0 0 0,";
+  d+="M-"+scalar+",0H"+scalar+"ZM0,-"+scalar+"V"+scalar;
+  d+=k+(-scalar)+k+scalar+"Z";
+  k=" 0 0 0 0,";
+  e="M0,"+i+"A"+i+","+i+k+(-i)+"M0,-"+scalar+"A"+scalar+","+scalar+k+scalar+"z";
+  e='M0,'+i+'A'+i+','+i+' 0 0 0 0,-'+i+'M0,-'+scalar+'A'+scalar+','+scalar+' 0 0 1 0,'+scalar+'zM0,-'+i+'A'+i+','+i+' 0 0 0 0,'+i+'M0,'+scalar+'A'+scalar+','+scalar+' 0 0 1 0,-'+scalar+'z'
+  bod.appendChild(jqmlsvg(['svg',{'version':1.1,'width':2*i,'height':2*i},['defs'
+  ,['radialGradient',{'id':'Fr','gradientUnits':'userSpaceOnUse','cx':0,'cy':-5,'r':320}
+  ,['stop',{'offset':'0%','style':'stop-color:black;'}]
+  ,['stop',{'offset':'94%','style':'stop-color:#001000;'}]
+  ,['stop',{'offset':'97%','style':'stop-color:#d0d0d0;'}]
+  ,['stop',{'offset':'100%','style':'stop-color:black;'}]]
+  ]
+  ,['g',j
+  ,['path',{'d':d,'id':'scope'}],['path',{'id':'arrow','d':'M0,-17.3L-5,0H5Z'}],['g',{'id':'spots'}]
+  ,['path',{'id':'ring','d':e,'style':'fill:url(#Fr);'}]
+  ]]));
+
+  var tmpk=['form',['table',{'id':'tabtpv'},['tr',['td','date'],['td',{'colspan':3},['output',{'name':'date'}]]],['tr',{'style':'display:none;'},['td','time'],['td',{'colspan':5},['output',{'name':'time'}]]],['tr',['td','latitude'],['td',['output',{'name':'lat'}]],['td','\u00b0\u00b1'],['td',['output',{'name':'epx'}]],['td',' 'm']],['tr',['td','longitude'],['td',['output',{'name':'lon'}]],['td','\u00b0\u00b1'],['td',['output',{'name':'epy'}]],['td',' m']],['tr',['td','atitude'],['td',['output',{'name':'alt'}]],['td','m\u00b1'],['td',['output',{'name':'epv'}]],['td',' m']],['tr',['td','speed'],['td',['output',{'name':'speed'}]],['td','m/s\u00b1'],['td',['output',{'name':'eps'}]],['td',' m/s']],['tr',['d','climb'],['td',['output',{'name':'climb'}]],['td','m/s']],['tr',['td','track'],['td',['output',{'name':'track'}]],['td','\u00b1']]]
+        ,['table',{'id':'tabsky'}
+                ,['tr',['th',{'colspan':5},'Satelites']]
+                ,['tr',['th','Num'],['th','SNR'],['th','Used'],['th','Elev'],['th','Azim']]
+        ,['tbody',{'id':'prn'}]]
+];
+
+  bod.appendChild(jqml(tmpk));
+
+  from=document.getElementsByTagName('form')[0];
+  arrow=document.getElementById('arrow');
+  prn=document.getElementById('prn');
+  spots=document.getElementById('spots');
+  if(0>testmode) {
+      if(typeof(EventSource)!=="undefined") {
+          var source=new EventSource("gpso.php");
+          source.onmessage=function(event) {
+                jsob=JSON.parse(event.data);
+                repaint();
+            };
+        } else
+        { Alert("No server-sent events support"); }
+    } else {
+        jsob=testdata[testmode];
+        repaint();
+    }
+ }
+
+function repaint() {
+    switch(jsob.class){
+        case "tpv":
+          paint_tpv();
+          break;
+        case "sky":
+          paint_sky1();
+          paint_sky2();
+          centertext();
+          spotresize();
+          break;
+        default:
+          alert("magic beans found.");
+      }
+  }
+
+
+function paint_tpv(){
+  dodate();
+  var ref, list=['lat', 'lon', 'alt','epx','epy','epv','track','speed','climb','eps'];
+  for(ref in list) {
+    from[list[ref]].value=jsob[list[ref]];
+   }
+  arrow.setAttribute('transform','rotate('+jsob.track+'),translate(0,-'+10+')');
+  if(typeof(map)=="undefined"){
+    StartMap();
+   } else {
+//    map.setHeading(jsob.track);
+    map.setCenter(new google.maps.LatLng(jsob.lat, jsob.lon));
+   }
+ }
+
+function paint_sky2(){
+  vore(prn);
+    var i;
+    for(i in jsob.satellites){
+        sat=jsob.satellites[i];
+        prn.appendChild(jqml(['tr',['td',sat.PRN],['td',sat.ss],['td',sat.used ? '\u221a':' 
+' ],['td',sat.el],['td',sat.az]]));
+      }
+  }
+
+function paint_sky1(){
+  var stile, i, sat, off, color, colorf, colors=['grey','red','yellow','green','blue'];
+  var od=5, oy=5, ox=5;
+  vore(spots);
+  for(i in jsob.satellites){
+     sat=jsob.satellites[i];
+     stile=docolor(sat.ss)
+// erygb ft q
+     if(sat.PRN>32) {
+          stile+=" q";
+        }
+     if(sat.used) {
+         colorf=color;
+         stile+=" t";
+       }else{
+         colorf="none"
+         stile+=" f";
+       }
+     if(scopetrig)
+         { off=Math.cos((sat.el/180)*Math.PI)*scalar.toFixed(2); }
+     else { off=(sat.el/90-1)*scalar; }
+     
+spots.appendChild(jqmlsvg(['g',{'class':stile,'cx':0,'cy':off,'r':od,'transform':'rotate('+sat.az+')'}
+,['g',{'transform':'translate(0,-'+off+'),rotate(-'+sat.az+')'}
+,['rect',{'y':0}]
+,['circle',{'r':od,'cx':0,'cy':0}]
+,['text',{'x':0,'y':0},sat.PRN]
+//['circle',{'title':sat.PRN,'r':5,'cx':0,'cy':off,'style':'fill:'+colorf+';stroke:'+color,'transform':'rotate('+sat.az+')'}
+]]));
+   }
+ }
+
+
+function centertext(){
+    var list, len, point, wx, wy, off;
+    list=document.getElementsByTagName('text');
+    len=list.length;
+    for(point=0;len>point;point++){
+        bb=list[point].getBBox();
+        wx=bb.width/2;
+        wy=bb.height/2;
+        dx=Math.max(dx, wx);
+        dy=Math.max(dy, wy);
+        off=list[point].getAttribute('y');
+        off=parseFloat(off)
+        list[point].y.basevalue=wy;
+        list[point].setAttribute('x',-wx);
+        list[point].setAttribute('y',(off+wy/2));
+      }
+  }
+function spotresize(){
+    var list, len, point, r=Math.pow(dx,2)+Math.pow(dy,2);
+        r=Math.sqrt(r);
+        r=Math.ceil(r)-3;
+    list=document.getElementsByTagName('circle');
+    len=list.length;
+    for(point=0;len>point;point++){
+        list[point].setAttribute("r",r);
+      }
+    list=document.getElementsByTagName('rect');
+    len=list.length;
+    for(point=0;len>point;point++){
+        list[point].setAttribute("x",-(dx+1));
+        list[point].setAttribute("y",-(dy+1));
+        list[point].setAttribute("width",(2+dx*2));
+        list[point].setAttribute("height",(2+dy*2));
+      }
+  }
+
+function vore(node){
+        while(node.childElementCount>0)
+                node.removeChild(node.childNodes[0]);
+  }
+
+function docolor(num){
+     if(30>num){
+         if(10>num)
+             { return "e"; }
+           else
+             { return"r"; }
+       } else {
+         if(35>num) {
+             return "y";
+           } else {
+             if(40>num)
+                 { return "g"; }
+               else
+                 { return "b"; }
+}}}
+
+function dodate(){
+  var haf, splut, k=new Date;
+  haf=jsob.time.split('T');
+  splut=haf[0].split('-');
+  k.setUTCFullYear(splut[0]);
+  k.setUTCMonth(splut[1]-1);
+  k.setUTCDate(splut[2]);
+  splut=haf[1].split(':');
+  k.setUTCHours(splut[0]);
+  k.setUTCMinutes(splut[1]);
+  k.setUTCSeconds(splut[2].substring(0, splut[2].length - 1));
+  from['time'].value=k.toTimeString();
+  from['date'].value=k.toDateString();
+}
+
+function StartMap() {
+  var Pcenter = new google.maps.LatLng(jsob.lat, jsob.lon);
+  var mapOptions = {
+    zoom: 18,
+    tilt: jsob.track,
+    center: Pcenter,
+    mapTypeId: google.maps.MapTypeId.SATELLITE
+  };
+  map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+  var marker = new google.maps.Marker({position: Pcenter, map: map, title: 'that' });
+}
+        </script>
+</head><body onload="init()">
+        <div id="map-canvas"></div>
+</body></html>
+```
