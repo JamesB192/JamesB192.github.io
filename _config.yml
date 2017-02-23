@@ -9,9 +9,9 @@
 title: Fighting Futility
 email: JamesB.fe80@gmail.com
 description: > # this means to ignore newlines until "baseurl:"
-  Write an awesome description for your new site here. You can edit this
-  line in _config.yml. It will appear in your document head meta (for
-  Google search results) and in your feed.xml site description.
+  Incarnation something of my useless attemt to run a blog. If I can't
+  Even manage to bang out a Facebook post a year what chance does this
+  have of being viable
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "http://JamesB192.github.io" # the base hostname & protocol for your site
 #twitter_username: jekyllrb
